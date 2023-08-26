@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click The State</title>
+
+    <link rel="stylesheet" type="text/css" href="app.css"/>
+
+    <!-- leaflet css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+
+</head>
+<body>
+   <center>
+        <div id="title">
+            <h1>Click The State</h1>
+            <h4> Game by: Liam Bouchereau</h4>
+        </div>
+        <button id = "startButton" onclick="startGame()">
+            Start
+        </button>
+
+        <p id = "state"></p>
+        <p id = "score"></p>
+    </center>
+</body>
+
+</html> 
+<!-- leaflet js -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script>
+    document.body.insertAdjacentHTML('beforeend', '<center><div id="map"></div></center>');
+    const KEY = "AIzaSyC4ms_qSS6r7w8qD45RR7HWxnfXZTpSWRo"
+    let score = 0;
+    let flag = 0;
+    let index = Math.floor((Math.random() * 48));
+    const statesList = new Array("Alabama", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming");
+    
+    var satImage = L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
+        attribution: '<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+        bounds: [[-75, -180], [81, 180]],
+        minZoom: 0,
+        maxZoom: 19,
+        apikey: 'choisirgeoportail',
+        format: 'image/jpeg',
+        style: 'normal',
+        interactive: 'false'
+        });
+
+    var borderImage = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+	    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	    subdomains: 'abcd',
+	    minZoom: 0,
+	    maxZoom: 20,
+	    ext: 'png',
+        interactive: 'false',
+        opacity: 1
+        });
+    
+    var satGroup = L.layerGroup([satImage, borderImage]);
+   // map.addLayer(satImage);
+
+    var map = L.map('map',{zoomControl: false, scrollWheelZoom: false, doubleClickZoom: false, dragging: false, touchZoom: false, tap: false, layers: [satGroup]}).setView([38.8283, -96.5795], 4);
+    
+    var lastClick = L.latLng(0.0,0.0);
+    var markerGroup = L.featureGroup().addTo(map);
+    
+    function startGame() {
+        map.removeLayer(markerGroup);
+        markerGroup.clearLayers();
+        const mapClicks = new Array();
+        borderImage.bringToBack();
+        if (flag == 0) {
+            document.getElementById("map").style.display = "block";
+            map.invalidateSize();
+        }
+         if (flag > 0) {
+        //     satGroup.removeLayer(borderImage);
+            map.eachLayer(function(layer){
+            console.log(layer);
+           // map.removeLayer(layer);
+        });
+         }
+        flag++;
+       
+        let blah = 0;
+        
+        document.getElementById("startButton").innerHTML= "Restart";
+        
+        //var map = L.map('map',{zoomControl: false, scrollWheelZoom: false, doubleClickZoom: false, dragging: false, touchZoom: false}).setView([38.8283, -96.5795], 4);
+
+        
+
+        // if(flag) {
+        //     satImage = L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
+        //     attribution: '<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+        //     bounds: [[-75, -180], [81, 180]],
+        //     minZoom: 0,
+        //     maxZoom: 19,
+        //     apikey: 'choisirgeoportail',
+        //     format: 'image/jpeg',
+        //     style: 'normal',
+        //     interactive: 'false'
+        // });
+        // }
+
+        
+
+        // if (flag) {
+        //     map.removeLayer(borderImage);
+        // }
+        
+        
+        
+
+        
+
+        
+        score = 0;
+        index = Math.floor((Math.random() * 48));
+        document.getElementById("state").innerHTML=`Click The State: ${statesList[index]}`;
+        document.getElementById("score").innerHTML=`Score: ${score}`;
+        map.on('click', function(e) {
+            if (e.latlng != lastClick){
+                mapClicks.push(e.latlng);
+                console.log(e.layer);
+                console.log('lat: ' + e.latlng.lat, 'lng: ' + e.latlng.lng);
+
+                let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${e.latlng.lat},${e.latlng.lng}&key=AIzaSyC4ms_qSS6r7w8qD45RR7HWxnfXZTpSWRo`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(jsonData => {
+                        console.log(jsonData);
+                        let addressParts = jsonData.results[0].address_components;
+                        addressParts.forEach(part => {
+                            if(part.types.includes("administrative_area_level_1")) {
+                                let state = part.long_name;
+                                console.log(state);
+                                console.log(statesList[index]);
+                                if(state === statesList[index]) {
+                                    document.getElementById("score").innerHTML=`Score: ${++score}`;
+                                    index = Math.floor((Math.random() * 48));
+                                    document.getElementById("state").innerHTML=`Click The State: ${statesList[index]}`;
+                                } else {
+                                    //map.removeLayer(satImage);
+                                    document.getElementById("state").innerHTML = `GAME OVER<br>You clicked: ${state}`;
+                                    borderImage.bringToFront();
+                                    mapClicks.forEach(placeMarker);
+                                }
+                            }
+                         })
+                    })
+                .catch(err => console.warn(err.message));
+                lastClick = e.latlng;
+            }
+            
+            
+        })
+   
+    }
+
+    function placeMarker(latlng) {
+        var marker = L.marker(latlng);
+        markerGroup.addLayer(marker);
+    }
+   
+</script>
