@@ -15,6 +15,7 @@
      crossorigin=""/>
 
 
+
 </head>
 <body>
    <center>
@@ -42,9 +43,11 @@
     const KEY = "AIzaSyC4ms_qSS6r7w8qD45RR7HWxnfXZTpSWRo"
     let score = 0;
     let flag = 0;
+    let loss = 0;
     let index = Math.floor((Math.random() * 48));
     const statesList = new Array("Alabama", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming");
     
+
     var satImage = L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
         attribution: '<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
         bounds: [[-75, -180], [81, 180]],
@@ -75,7 +78,8 @@
     var markerGroup = L.featureGroup().addTo(map);
     
     function startGame() {
-        map.removeLayer(markerGroup);
+        loss = 0;
+        removeAllMarkers();
         markerGroup.clearLayers();
         const mapClicks = new Array();
         borderImage.bringToBack();
@@ -130,6 +134,7 @@
         document.getElementById("state").innerHTML=`Click The State: ${statesList[index]}`;
         document.getElementById("score").innerHTML=`Score: ${score}`;
         map.on('click', function(e) {
+            if(loss == 0) {
             if (e.latlng != lastClick){
                 mapClicks.push(e.latlng);
                 console.log(e.layer);
@@ -151,10 +156,17 @@
                                     index = Math.floor((Math.random() * 48));
                                     document.getElementById("state").innerHTML=`Click The State: ${statesList[index]}`;
                                 } else {
+                                    loss = 1;
+                                    
                                     //map.removeLayer(satImage);
                                     document.getElementById("state").innerHTML = `GAME OVER<br>You clicked: ${state}`;
                                     borderImage.bringToFront();
-                                    mapClicks.forEach(placeMarker);
+                                    for (let i = 0; i < mapClicks.length - 1; i++) {
+                                        placeMarker(mapClicks[i]);
+                                    }
+                                    placeMarker(mapClicks[mapClicks.length - 1]);
+                                    map.addLayer(markerGroup);
+                                    mapClicks.length = 0;
                                 }
                             }
                          })
@@ -162,7 +174,7 @@
                 .catch(err => console.warn(err.message));
                 lastClick = e.latlng;
             }
-            
+        } 
             
         })
    
@@ -171,6 +183,14 @@
     function placeMarker(latlng) {
         var marker = L.marker(latlng);
         markerGroup.addLayer(marker);
+    }
+
+    function removeAllMarkers() {
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
     }
    
 </script>
